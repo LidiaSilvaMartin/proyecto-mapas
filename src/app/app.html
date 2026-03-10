@@ -1,26 +1,37 @@
-<google-map
-  height="500px"
-  width="100%"
-  [zoom]="zoom"
-  [center]="center"
-  [options]="options"
-  (mapClick)="click($event)"
->
+<google-map height="550px" width="100%" [zoom]="zoom" [center]="center" [options]="options">
   <map-marker
-    #markerElem="mapMarker"
-    *ngFor="let marker of markers"
-    [position]="marker.position"
-    [label]="marker.label"
-    [title]="marker.title"
-    [options]="marker.options"
-    (mapClick)="openInfo(markerElem, marker.info)"
-  >
+    #mLago="mapMarker"
+    [position]="puntoManual.position"
+    [title]="puntoManual.title"
+    [label]="'L'"
+    (mapClick)="openInfo(mLago, 'Ubicación manual: Parque del Lago')">
   </map-marker>
 
+  <map-marker
+    *ngIf="puntoApi"
+    #mApi="mapMarker"
+    [position]="puntoApi.position"
+    [title]="puntoApi.title"
+    (mapClick)="openInfo(mApi, 'Desde API: ' + puntoApi.title)">
+  </map-marker>
+
+  <map-marker
+    *ngFor="let m of markers"
+    #mBoton="mapMarker"
+    [position]="m.position"
+    [label]="m.label"
+    [options]="m.options"
+    (mapClick)="openInfo(mBoton, m.info)">
+  </map-marker>
+
+  
   <map-info-window>{{ infoContent }}</map-info-window>
 </google-map>
 
-<button (click)="zoomIn()">Zoom in</button>
-<button (click)="zoomOut()">Zoom out</button>
-<button (click)="logCenter()">Log center</button>
-<button (click)="addMarker()">Add marker</button>
+<div style="margin-top: 10px;">
+  <button (click)="zoomIn()">Acercar</button>
+  <button (click)="zoomOut()">Alejar</button>
+  <button (click)="logCenter()">Ver Coordenadas en Consola</button>
+  <button (click)="addMarker()">Añadir Punto Aleatorio</button>
+  <button (click)="limpiarMarcadores()">Eliminar Punto Aleatorio</button>
+</div>

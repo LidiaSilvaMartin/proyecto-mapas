@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { MapInfoWindow, MapMarker, GoogleMap, GoogleMapsModule } from '@angular/google-maps';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http'; 
-
 import { ViaVerde, MiPunto } from './enclave.model';
   
 @Component({
@@ -50,10 +49,11 @@ export class AppComponent implements OnInit {
   }
 
 cargarPuntoApi() {
+  //llama a la url de la api
   this.http.get<ViaVerde>('https://mapa.viaverdectl.gal/api/v1/enclaves')
-    .subscribe(respuesta => {
+    .subscribe(respuesta => { //espera a que la api responda
       // Extraemos los datos de la API
-      const item = respuesta.data[0]; 
+      const item = respuesta.data[0]; //de toda la lista coge el primero
       const coords = item.locations[0].coords;
 
       // Uso mi interfaz para guardar el punto
@@ -84,20 +84,22 @@ cargarPuntoApi() {
     console.log(event);
   }
 
+  //localizar el centro para que te diga las coordenadas exactas del punto
   logCenter() {
     console.log(JSON.stringify(this.map.getCenter()));
   }
 
+  //añade puntos aleatorios en el mapa
   addMarker() {
-    this.markers.push({
-      position: {
-        lat: this.center.lat + ((Math.random() - 0.5) * 2) / 100,
-        lng: this.center.lng + ((Math.random() - 0.5) * 2) / 100,
+    this.markers.push({ 
+      position: { //coordenadas donde se va a pintar el nuevo marcador.
+        lat: this.center.lat + ((Math.random() - 0.5) * 2) / 100, //coge la latitud actual y un numero aleatorio entre 0 y 1
+        lng: this.center.lng + ((Math.random() - 0.5) * 2) / 100, //coge la longitud actual y un numero aleatorio entre 0 y 1
       },
-      label: { color: 'white', text: 'M' },
+      label: { color: 'white', text: 'L' }, //dibuja la letra M en color blanco
       title: 'Marcador manual',
       info: 'Punto creado con el botón',
-      options: { animation: google.maps.Animation.BOUNCE },
+      options: { animation: google.maps.Animation.BOUNCE }, //saltos
     });
   }
 

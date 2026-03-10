@@ -1,0 +1,15 @@
+:host {
+  display: block;
+  height: 100vh;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+}
+.map-container{
+    position:relative;
+    width:100%;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0,15);
+}
+
+
