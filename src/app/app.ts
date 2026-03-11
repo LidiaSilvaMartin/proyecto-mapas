@@ -56,25 +56,9 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.cargarEnclaves();
-    this.cargarRutas(); // Inicializamos las rutas
   }
 
-  cargarRutas() {
-    this.listaRutas = [
-      { 
-        id: 'r1', 
-        nombre: 'Vía Verde: Tramo Santiago', 
-        kml: 'https://mapa.viaverdectl.gal/storage/kml/ruta-santiago.kml', 
-        imagen: 'https://via.placeholder.com/100x85/72a41d/ffffff?text=Santiago' 
-      },
-      { 
-        id: 'r2', 
-        nombre: 'Vía Verde: Tramo Oroso', 
-        kml: 'https://mapa.viaverdectl.gal/storage/kml/ruta-oroso.kml', 
-        imagen: 'https://via.placeholder.com/100x85/72a41d/ffffff?text=Oroso' 
-      }
-    ];
-  }
+ 
 
   seleccionarRuta(ruta: Ruta) {
     // Si haces clic en la misma ruta, la quitamos del mapa. Si no, la cargamos.
@@ -90,7 +74,7 @@ export class AppComponent implements OnInit {
 
   cambiarTab(nuevaTab: 'puntos' | 'rutas') {
     this.tabActual = nuevaTab;
-    this.enclaveSeleccionado = null; // Cerramos el detalle si cambiamos de tab
+    this.enclaveSeleccionado = null;
     
     // Si volvemos a puntos, solemos querer limpiar la ruta del mapa
     if (nuevaTab === 'puntos') {
