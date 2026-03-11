@@ -1,0 +1,26 @@
+<div class="sidebar-header">
+    <img src="viaverde.png" class="logo">
+
+<div class="tabs">
+    <button [class.active]="tabActual === 'puntos'" (click)="tabActual = 'puntos'">Puntos de interés
+    </button>
+    <button [class.active]="tabActual === 'rutas'" (click)="tabActual = 'rutas'">Rutas
+    </button>
+</div>
+</div>
+
+<div class="sidebar-content">
+    @if (seleccionado$ | async; as seleccionado){
+    <app-enclave-detail [punto]="seleccionado"></app-enclave-detail>
+    }
+    @else {
+        @if (tabActual === 'puntos') {
+        <app-enclave-list [puntos]="enclaves$ | async"></app-enclave-list>
+    } 
+    @else {
+      <div class="empty-state">
+        <p>Próximamente: Listado de rutas</p>
+      </div>
+    }
+  }
+</div>

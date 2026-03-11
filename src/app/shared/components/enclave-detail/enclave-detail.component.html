@@ -1,0 +1,26 @@
+<div class="detail-view">
+  <div class="detail-hero">
+    <button class="btn-back" (click)="enclaveSvc.seleccionarEnclave(null)">←</button>
+    <img [src]="punto.imagen" class="img-full">
+    <div class="title-overlay">
+      <h2>{{ punto.nombre }}</h2>
+    </div>
+  </div>
+
+  <div class="green-actions">
+    <div class="act-box" (click)="enclaveSvc.abrirEnGoogleMaps(punto)">
+      <span>↪️</span>
+      <small>Cómo llegar</small>
+    </div>
+    <div class="act-box" (click)="enclaveSvc.copiarLink(punto)">
+      <span>🔗</span>
+      <small>Compartir</small>
+    </div>
+  </div>
+
+  <div class="info-body">
+    <h3 class="green-title">📄 Datos de interés</h3>
+    <div class="info-item">📍 {{ punto.direccion }}</div>
+    <div class="info-item">🕒 <strong class="text-green">Abierto.</strong> Cierra a las 16:00</div>
+  </div>
+</div>

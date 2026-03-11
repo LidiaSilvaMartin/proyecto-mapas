@@ -1,0 +1,12 @@
+:host {
+    display:block;
+    width: 100%;
+    height: 100%; /* el mapa ocupa toda la pantalla */
+}
+
+google-map {
+    display:block;
+    width: 100%;
+    height: 100%; 
+}
+

@@ -1,0 +1,57 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sidebar-header {
+  padding: 20px 15px;
+  background: white;
+  border-bottom: 1px solid #eee;
+  flex-shrink: 0;
+}
+
+.logo {
+  display: block;
+  max-width: 130px;
+  margin: 0 auto 15px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  padding: 0 5px;
+}
+
+.tabs button {
+  flex: 1;
+  padding: 10px 4px;
+  font-size: 13px; 
+  font-weight: 600;
+  border: 1px solid #72a41d;
+  background: white;
+  color: #72a41d;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap; /* Evita que el texto salte de línea */
+}
+
+.tabs button.active {
+  background: #72a41d;
+  color: white;
+}
+
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto; /* Permite bajar por la lista sin mover el mapa o el logo */
+  background: #f8f9fa;
+}
+
+.sidebar-content::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar-content::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}

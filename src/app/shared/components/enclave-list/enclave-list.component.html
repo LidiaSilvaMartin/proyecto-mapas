@@ -1,0 +1,16 @@
+<div class="sidebar-list">
+  @for (punto of puntos; track punto.id) {
+    <div class="card" (click)="enclaveSvc.seleccionarEnclave(punto)">
+      <div class="card-img"><img [src]="punto.imagen"></div>
+      <div class="card-info">
+        <h3>{{ punto.nombre }}</h3>
+        <div class="card-icons">
+          <span (click)="$event.stopPropagation(); enclaveSvc.abrirEnGoogleMaps(punto)">➡️</span>
+          <span (click)="$event.stopPropagation(); enclaveSvc.copiarLink(punto)">🔗</span>
+        </div>
+      </div>
+    </div>
+  } @empty {
+    <div class="empty">No hay resultados.</div>
+  }
+</div>

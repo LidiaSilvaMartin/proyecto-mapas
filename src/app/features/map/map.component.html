@@ -1,0 +1,8 @@
+<google-map height="100%" width="100%" [center]="center" [zoom]="zoom">
+  @for (p of enclaves$ | async; track p.id) {
+    <map-marker
+      [position]="{lat: p.latitud, lng: p.longitud}"
+      (mapClick)="enclaveSvc.seleccionarEnclave(p)">
+    </map-marker>
+  }
+</google-map>
