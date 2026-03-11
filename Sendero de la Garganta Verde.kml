@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Sendero de la Garganta Verde</name>
+    <description/>
+    <Style id="line-000000-1200-nodesc-normal">
+      <LineStyle>
+        <color>ff000000</color>
+        <width>1.2</width>
+      </LineStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <Style id="line-000000-1200-nodesc-highlight">
+      <LineStyle>
+        <color>ff000000</color>
+        <width>1.8</width>
+      </LineStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <StyleMap id="line-000000-1200-nodesc">
+      <Pair>
+        <key>normal</key>
+        <styleUrl>#line-000000-1200-nodesc-normal</styleUrl>
+      </Pair>
+      <Pair>
+        <key>highlight</key>
+        <styleUrl>#line-000000-1200-nodesc-highlight</styleUrl>
+      </Pair>
+    </StyleMap>
+    <Folder>
+      <name>Capa sin nombre</name>
+      <Placemark>
+        <name>Línea 4</name>
+        <styleUrl>#line-000000-1200-nodesc</styleUrl>
+        <LineString>
+          <tessellate>1</tessellate>
+          <coordinates>
+            -5.3926817,36.8091511,0
+            -5.3968874,36.8122434,0
+            -5.4013506,36.8134116,0
+            -5.4022089,36.8154043,0
+            -5.4045263,36.815954,0
+            -5.4062429,36.8123808,0
+            -5.4103628,36.8108691,0
+            -5.4086462,36.8092886,0
+            -5.4107061,36.8066085,0
+            -5.408732,36.8051653,0
+            -5.4116503,36.8018665,0
+            -5.4091612,36.8009044,0
+            -5.4131094,36.7981553,0
+            -5.4114786,36.7954061,0
+            -5.4116503,36.7927255,0
+            -5.4090754,36.792588,0
+            -5.4044405,36.7924505,0
+            -5.3981749,36.7910759,0
+            -5.3953424,36.791557,0
+            -5.3941408,36.7897699,0
+            -5.3918234,36.7894949,0
+            -5.3908792,36.7875015,0
+            -5.3877893,36.7874328,0
+            -5.3864161,36.786333,0
+            -5.3834978,36.786333,0
+            -5.3821245,36.7855081,0
+            -5.3800646,36.7859205,0
+            -5.378348,36.7855768,0
+            -5.3754297,36.7856456,0
+            -5.3765455,36.7875015,0
+          </coordinates>
+        </LineString>
+      </Placemark>
+      <Placemark>
+        <name>Línea 5</name>
+        <styleUrl>#line-000000-1200-nodesc</styleUrl>
+        <LineString>
+          <tessellate>1</tessellate>
+          <coordinates>
+            -5.3772322,36.7895637,0
+            -5.3774038,36.792588,0
+            -5.3804937,36.7927255,0
+            -5.3810087,36.7952686,0
+            -5.3840986,36.7966432,0
+            -5.3854719,36.7991862,0
+            -5.3881327,36.7996673,0
+            -5.3901068,36.8057838,0
+            -5.3949133,36.8063336,0
+            -5.3939692,36.8085326,0
+          </coordinates>
+        </LineString>
+      </Placemark>
+    </Folder>
+  </Document>
+</kml>
