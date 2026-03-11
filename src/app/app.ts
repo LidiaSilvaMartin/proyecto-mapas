@@ -1,114 +1,181 @@
-import { Component, OnInit, ViewChild, inject } from '@angular/core';
-import { MapInfoWindow, MapMarker, GoogleMap, GoogleMapsModule } from '@angular/google-maps';
+import { Component, OnInit, ViewChild, inject, ChangeDetectorRef } from '@angular/core';
+import { GoogleMap, GoogleMapsModule } from '@angular/google-maps';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpClientModule } from '@angular/common/http'; 
-import { ViaVerde, MiPunto } from './enclave.model';
-  
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatExpansionModule } from '@angular/material/expansion';
+
+//MOVER ESTA INTERFAZ A SU ARCHIVO enclave.models.ts
+interface Ruta {
+  id: string;
+  nombre: string;
+  kml: string;
+  imagen: string;
+}
+
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [GoogleMapsModule, CommonModule, HttpClientModule], 
+  imports: [GoogleMapsModule, CommonModule, HttpClientModule, MatCheckboxModule, MatExpansionModule],
   templateUrl: './app.html',
   styleUrls: ['./app.css'],
 })
 export class AppComponent implements OnInit {
-  @ViewChild(GoogleMap, { static: false }) map!: GoogleMap;
-  @ViewChild(MapInfoWindow, { static: false }) info!: MapInfoWindow;
+  @ViewChild(GoogleMap) map!: GoogleMap;
 
   private http = inject(HttpClient);
+  private cdr = inject(ChangeDetectorRef);
 
-  //Configuración inicial
-  zoom = 17;
-  center: google.maps.LatLngLiteral = { lat: 42.87337, lng: -8.52414 }; 
+  //CONFIGURACIÓN MAPA
+  zoom = 12;
+  center: google.maps.LatLngLiteral = { lat: 42.88, lng: -8.53 };
   options: google.maps.MapOptions = {
-    zoomControl: false,
-    scrollwheel: true,
-    disableDoubleClickZoom: true,
-    mapTypeId: 'hybrid',
-    maxZoom: 18,
-    minZoom: 8,
-  };
-  
-  puntoApi: any = null; 
-
-  // COORDENADAS EN BRUTO: Parque del Lago
-  puntoManual = {
-    position: { lat: 42.87337, lng: -8.52414 },
-    title: 'Parque del Lago (Marcador Fijo)'
+    mapTypeId: 'roadmap',
+    disableDefaultUI: true,
+    styles: [] 
   };
 
-  markers: any[] = [];  
-  infoContent = '';
+  // ESTADO DE LA INTERFAZ
+  tabActual: 'puntos' | 'rutas' = 'puntos'; // Controla qué pestaña vemos
+
+  //DATOS PUNTOS DE INTERÉS
+  listaEnclaves: any[] = [];
+  listaFiltrada: any[] = [];
+  enclaveSeleccionado: any = null;
+
+  //DATOS RUTAS
+  listaRutas: Ruta[] = [];
+  rutaSeleccionadaUrl: string | null = null; 
+
+  // categorias no validas
+  categorias: string[] = ['Naturaleza', 'Patrimonio', 'Patrimonio militar', 'Restauración', 'Sendero', 'Alojamiento', 'Hostal', 'Hotel', 'Camping', 'Albergue', 'Aparcamiento', 'Área de descanso', 'Empresa turística', 'Monumento', 'Museo'];
+  ayuntamientos: string[] = ['Cerceda', 'Ordes', 'Oroso', 'Santiago de Compostela', 'Tordoia'];
+
+  categoriasSeleccionadas: Set<string> = new Set();
+  ayuntamientosSeleccionados: Set<string> = new Set();
 
   ngOnInit() {
-    // Establecemos el centro en el Lago nada más arrancar
-    this.center = this.puntoManual.position;
-    this.zoom = 17;
-
-    this.cargarPuntoApi();
+    this.cargarEnclaves();
+    this.cargarRutas(); // Inicializamos las rutas
   }
 
-cargarPuntoApi() {
-  //llama a la url de la api
-  this.http.get<ViaVerde>('https://mapa.viaverdectl.gal/api/v1/enclaves')
-    .subscribe(respuesta => { //espera a que la api responda
-      // Extraemos los datos de la API
-      const item = respuesta.data[0]; //de toda la lista coge el primero
-      const coords = item.locations[0].coords;
-
-      // Uso mi interfaz para guardar el punto
-      const nuevoEnclave: MiPunto = {
-        nombre: item.name,
-        latitud: parseFloat(coords.latitude),
-        longitud: parseFloat(coords.longitude)
-      };
-
-      this.puntoApi = {
-        position: { lat: nuevoEnclave.latitud, lng: nuevoEnclave.longitud },
-        title: nuevoEnclave.nombre
-      };
-      
-      console.log('Enclave cargado usando interfaces:', nuevoEnclave);
-    });
-}
-
-  zoomIn() {
-    if (this.zoom < (this.options.maxZoom ?? 18)) this.zoom++;
-  }
-
-  zoomOut() {
-    if (this.zoom > (this.options.minZoom ?? 8)) this.zoom--;
-  }
-
-  click(event: any) {
-    console.log(event);
-  }
-
-  //localizar el centro para que te diga las coordenadas exactas del punto
-  logCenter() {
-    console.log(JSON.stringify(this.map.getCenter()));
-  }
-
-  //añade puntos aleatorios en el mapa
-  addMarker() {
-    this.markers.push({ 
-      position: { //coordenadas donde se va a pintar el nuevo marcador.
-        lat: this.center.lat + ((Math.random() - 0.5) * 2) / 100, //coge la latitud actual y un numero aleatorio entre 0 y 1
-        lng: this.center.lng + ((Math.random() - 0.5) * 2) / 100, //coge la longitud actual y un numero aleatorio entre 0 y 1
+  cargarRutas() {
+    this.listaRutas = [
+      { 
+        id: 'r1', 
+        nombre: 'Vía Verde: Tramo Santiago', 
+        kml: 'https://mapa.viaverdectl.gal/storage/kml/ruta-santiago.kml', 
+        imagen: 'https://via.placeholder.com/100x85/72a41d/ffffff?text=Santiago' 
       },
-      label: { color: 'white', text: 'L' }, //dibuja la letra M en color blanco
-      title: 'Marcador manual',
-      info: 'Punto creado con el botón',
-      options: { animation: google.maps.Animation.BOUNCE }, //saltos
-    });
+      { 
+        id: 'r2', 
+        nombre: 'Vía Verde: Tramo Oroso', 
+        kml: 'https://mapa.viaverdectl.gal/storage/kml/ruta-oroso.kml', 
+        imagen: 'https://via.placeholder.com/100x85/72a41d/ffffff?text=Oroso' 
+      }
+    ];
   }
 
-  //eliminar los marcadores aleatorios
-  limpiarMarcadores() {
-    this.markers = [];
-}
-  openInfo(marker: MapMarker, content: any) {
-    this.infoContent = content;
-    this.info.open(marker);
+  seleccionarRuta(ruta: Ruta) {
+    // Si haces clic en la misma ruta, la quitamos del mapa. Si no, la cargamos.
+    if (this.rutaSeleccionadaUrl === ruta.kml) {
+      this.rutaSeleccionadaUrl = null;
+    } else {
+      this.rutaSeleccionadaUrl = ruta.kml;
+      // Ajustamos el zoom para ver la ruta completa
+      this.zoom = 11;
+      this.center = { lat: 42.95, lng: -8.45 }; 
+    }
+  }
+
+  cambiarTab(nuevaTab: 'puntos' | 'rutas') {
+    this.tabActual = nuevaTab;
+    this.enclaveSeleccionado = null; // Cerramos el detalle si cambiamos de tab
+    
+    // Si volvemos a puntos, solemos querer limpiar la ruta del mapa
+    if (nuevaTab === 'puntos') {
+      this.rutaSeleccionadaUrl = null;
+    }
+  }
+
+  limpiar(texto: string): string {
+    if (!texto) return '';
+    return texto.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  }
+
+  cargarEnclaves() {
+    this.http.get<any>('https://mapa.viaverdectl.gal/api/v1/enclaves')
+      .subscribe({
+        next: (respuesta) => {
+          this.listaEnclaves = respuesta.data.map((item: any) => ({
+            id: item.id.toString(),
+            nombre: item.name,
+            latitud: parseFloat(item.locations?.[0]?.coords?.latitude || '42.88'),
+            longitud: parseFloat(item.locations?.[0]?.coords?.longitude || '-8.53'),
+            imagen: item.cover_image?.url || 'https://via.placeholder.com/400x250',
+            direccion: item.locations?.[0]?.address || 'Dirección no disponible',
+            catAPI: this.limpiar(item.category?.name),
+            ayunAPI: this.limpiar(item.locations?.[0]?.municipality?.name)
+          }));
+
+          const params = new URLSearchParams(window.location.search);
+          const idUrl = params.get('id');
+          if (idUrl) {
+            const sitio = this.listaEnclaves.find(p => p.id === idUrl);
+            if (sitio) {
+              this.enclaveSeleccionado = sitio;
+              this.center = { lat: sitio.latitud, lng: sitio.longitud };
+              this.zoom = 17;
+            }
+          }
+          this.listaFiltrada = [...this.listaEnclaves];
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  toggleCategoria(cat: string, checked: boolean) {
+    const valor = this.limpiar(cat);
+    if (checked) this.categoriasSeleccionadas.add(valor);
+    else this.categoriasSeleccionadas.delete(valor);
+    this.aplicarFiltros();
+  }
+
+  toggleAyuntamiento(ayun: string, checked: boolean) {
+    const valor = this.limpiar(ayun);
+    if (checked) this.ayuntamientosSeleccionados.add(valor);
+    else this.ayuntamientosSeleccionados.delete(valor);
+    this.aplicarFiltros();
+  }
+
+  aplicarFiltros() {
+    this.listaFiltrada = this.listaEnclaves.filter(punto => {
+      const coincideCat = this.categoriasSeleccionadas.size === 0 || this.categoriasSeleccionadas.has(punto.catAPI);
+      const coincideAyun = this.ayuntamientosSeleccionados.size === 0 || this.ayuntamientosSeleccionados.has(punto.ayunAPI);
+      return coincideCat && coincideAyun;
+    });
+
+    if (this.listaFiltrada.length > 0 && !this.enclaveSeleccionado) {
+      this.center = { lat: this.listaFiltrada[0].latitud, lng: this.listaFiltrada[0].longitud };
+    }
+    this.cdr.detectChanges();
+  }
+  volverALista() {
+    this.enclaveSeleccionado = null;
+    this.zoom = 12;
+    this.center = { lat: 42.88, lng: -8.53 };
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
+  copiarLink(punto: any, event: Event) {
+    event.stopPropagation();
+    const url = window.location.origin + window.location.pathname + '?id=' + punto.id;
+    navigator.clipboard.writeText(url).then(() => alert('Enlace copiado.'));
+  }
+
+  abrirEnGoogleMaps(punto: any, event: Event) {
+    event.stopPropagation();
+    const query = encodeURIComponent(`${punto.nombre}, ${punto.latitud},${punto.longitud}`);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
   }
 }

@@ -1,37 +1,127 @@
-<google-map height="550px" width="100%" [zoom]="zoom" [center]="center" [options]="options">
-  <map-marker
-    #mLago="mapMarker"
-    [position]="puntoManual.position"
-    [title]="puntoManual.title"
-    [label]="'L'"
-    (mapClick)="openInfo(mLago, 'Ubicación manual: Parque del Lago')">
-  </map-marker>
+<div class="app-container">
+  <aside class="sidebar">
+    
+    @if (enclaveSeleccionado) {
+      <div class="detail-view">
+        <div class="detail-hero">
+          <button class="btn-back" (click)="volverALista()">←</button>
+          <img [src]="enclaveSeleccionado.imagen" class="img-full">
+          <div class="title-overlay">
+            <h2>{{ enclaveSeleccionado.nombre }}</h2>
+          </div>
+        </div>
 
-  <map-marker
-    *ngIf="puntoApi"
-    #mApi="mapMarker"
-    [position]="puntoApi.position"
-    [title]="puntoApi.title"
-    (mapClick)="openInfo(mApi, 'Desde API: ' + puntoApi.title)">
-  </map-marker>
+        <div class="green-actions">
+          <div class="act-box" (click)="abrirEnGoogleMaps(enclaveSeleccionado, $event)">
+            <span>↪️</span>
+            <small>Cómo llegar</small>
+          </div>
+          <div class="act-box" (click)="copiarLink(enclaveSeleccionado, $event)">
+            <span>🔗</span>
+            <small>Compartir</small>
+          </div>
+        </div>
 
-  <map-marker
-    *ngFor="let m of markers"
-    #mBoton="mapMarker"
-    [position]="m.position"
-    [label]="m.label"
-    [options]="m.options"
-    (mapClick)="openInfo(mBoton, m.info)">
-  </map-marker>
+        <div class="info-body">
+          <h3 class="green-title">📄 Datos de interés</h3>
+          <div class="info-item">📍 {{ enclaveSeleccionado.direccion }}</div>
+          <div class="info-item">🕒 <strong class="text-green">Abierto.</strong> Cierra a las 16:00</div>
+        </div>
+      </div>
+    } 
+    
+    @else {
+      <div class="sidebar-header">
+        <img src="viaverde.png" class="logo">
+        
+        <div class="tabs">
+          <button [class.active]="tabActual === 'puntos'" (click)="cambiarTab('puntos')">
+            Punto de interés
+          </button>
+          <button [class.active]="tabActual === 'rutas'" (click)="cambiarTab('rutas')">
+            Rutas
+          </button>
+        </div>
+        
+        @if (tabActual === 'puntos') {
+          <div class="filters-scroll">
+            <mat-accordion multi="true">
+              <mat-expansion-panel class="custom-panel">
+                <mat-expansion-panel-header><strong>Ayuntamientos</strong></mat-expansion-panel-header>
+                <div class="check-list beige-bg">
+                  @for (a of ayuntamientos; track a) {
+                    <mat-checkbox (change)="toggleAyuntamiento(a, $event.checked)">{{a}}</mat-checkbox>
+                  }
+                </div>
+              </mat-expansion-panel>
 
-  
-  <map-info-window>{{ infoContent }}</map-info-window>
-</google-map>
+              <mat-expansion-panel class="custom-panel">
+                <mat-expansion-panel-header><strong>Categorías</strong></mat-expansion-panel-header>
+                <div class="check-list">
+                  @for (c of categorias; track c) {
+                    <mat-checkbox (change)="toggleCategoria(c, $event.checked)">{{c}}</mat-checkbox>
+                  }
+                </div>
+              </mat-expansion-panel>
+            </mat-accordion>
+          </div>
+        }
+      </div>
 
-<div style="margin-top: 10px;">
-  <button (click)="zoomIn()">Acercar</button>
-  <button (click)="zoomOut()">Alejar</button>
-  <button (click)="logCenter()">Ver Coordenadas en Consola</button>
-  <button (click)="addMarker()">Añadir Punto Aleatorio</button>
-  <button (click)="limpiarMarcadores()">Eliminar Punto Aleatorio</button>
+      <div class="sidebar-list">
+        
+        @if (tabActual === 'puntos') {
+          @for (punto of listaFiltrada; track punto.id) {
+            <div class="card" (click)="enclaveSeleccionado = punto; center = {lat: punto.latitud, lng: punto.longitud}; zoom = 17">
+              <div class="card-img"><img [src]="punto.imagen"></div>
+              <div class="card-info">
+                <h3>{{ punto.nombre }}</h3>
+                <div class="card-icons">
+                  <span (click)="abrirEnGoogleMaps(punto, $event)">➡️</span>
+                  <span (click)="copiarLink(punto, $event)">🔗</span>
+                </div>
+              </div>
+            </div>
+          } @empty {
+            <div class="empty">No hay resultados.</div>
+          }
+        }
+
+        @if (tabActual === 'rutas') {
+          @for (ruta of listaRutas; track ruta.id) {
+            <div class="card" 
+                 [style.border-left]="rutaSeleccionadaUrl === ruta.kml ? '5px solid #72a41d' : 'none'"
+                 (click)="seleccionarRuta(ruta)">
+              <div class="card-img"><img [src]="ruta.imagen"></div>
+              <div class="card-info">
+                <h3>{{ ruta.nombre }}</h3>
+                <small [style.color]="rutaSeleccionadaUrl === ruta.kml ? '#72a41d' : '#999'">
+                  {{ rutaSeleccionadaUrl === ruta.kml ? '📍 Mostrando ruta' : 'Ver recorrido' }}
+                </small>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    }
+  </aside>
+
+  <main class="map-container">
+    <google-map height="100%" width="100%" [zoom]="zoom" [center]="center" [options]="options">
+      
+      @if (tabActual === 'rutas' && rutaSeleccionadaUrl) {
+        <map-kml-layer [url]="rutaSeleccionadaUrl"></map-kml-layer>
+      }
+
+      @if (tabActual === 'puntos') {
+        @if (enclaveSeleccionado) {
+          <map-marker [position]="{lat: enclaveSeleccionado.latitud, lng: enclaveSeleccionado.longitud}"></map-marker>
+        } @else {
+          @for (p of listaFiltrada; track p.id) {
+            <map-marker [position]="{lat: p.latitud, lng: p.longitud}"></map-marker>
+          }
+        }
+      }
+    </google-map>
+  </main>
 </div>
