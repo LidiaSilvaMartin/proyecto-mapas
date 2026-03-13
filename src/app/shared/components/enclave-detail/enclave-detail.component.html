@@ -1,9 +1,9 @@
 <div class="detail-view">
   <div class="detail-hero">
     <button class="btn-back" (click)="enclaveSvc.seleccionarEnclave(null)">←</button>
-    <img [src]="punto.imagen" class="img-full">
+    <img [src]="punto.image" class="img-full">
     <div class="title-overlay">
-      <h2>{{ punto.nombre }}</h2>
+      <h2>{{ punto.name }}</h2>
     </div>
   </div>
 
@@ -20,7 +20,18 @@
 
   <div class="info-body">
     <h3 class="green-title">📄 Datos de interés</h3>
-    <div class="info-item">📍 {{ punto.direccion }}</div>
-    <div class="info-item">🕒 <strong class="text-green">Abierto.</strong> Cierra a las 16:00</div>
-  </div>
+    <div class="info-item">📍 {{ punto.address }}</div>
+   
+    <div class="info-item">
+      🕒 
+      @if (enclaveSvc.getEstadoHorario(punto.horarios); as res) {
+        <strong [style.color]="res.abierto ? '#2e7d32' : '#d32f2f'">
+          {{ res.abierto ? 'Abierto.' : 'Cerrado.' }}
+        </strong>
+        <span> {{ res.mensaje }}</span>
+      }
+    </div>
 </div>
+
+</div>
+<!--Es la ficha tecnica lo que aparece cuando haces clic en un punto de la lista-->

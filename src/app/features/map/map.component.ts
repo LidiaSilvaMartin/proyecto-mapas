@@ -1,8 +1,8 @@
 //componente que solo "mira" lo que dice el servicio
-
-import{ Component, inject, OnInit} from '@angular/core';
+//componente de visualización geográfica
+import { Component, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { GoogleMapsModule} from '@angular/google-maps';
+import { GoogleMapsModule } from '@angular/google-maps';
 import { EnclaveService } from '../../core/services/enclave.service';
 
 @Component({
@@ -13,20 +13,24 @@ import { EnclaveService } from '../../core/services/enclave.service';
     styleUrls: ['./map.component.css']
 })
 
-export class MapComponent implements OnInit{
+export class MapComponent {
     public enclaveSvc = inject(EnclaveService);
-    public enclaves$ = this.enclaveSvc.enclaves$;
+    public enclaves = this.enclaveSvc.enclaves;
 
-    center= { lat: 42.88, lng: -8.53 };
+    center = { lat: 42.88, lng: -8.53 };
     zoom = 12;
 
-    ngOnInit() {
-        this.enclaveSvc.enclaveSeleccionado$.subscribe(p => {
-        //si alguien selecciona en la lista, el mapa se mueve
-        if (p) {
-            this.center = { lat: p.latitud, lng: p.longitud };
-            this.zoom = 17;
-        }
-    });
+    constructor() {
+        effect(() => {
+            const p = this.enclaveSvc.enclaveSeleccionado();
+            if (p) {
+                this.center = { lat: p.latitude, lng: p.longitude };
+                this.zoom = 17;
+            }
+        });
+    }
 }
-}
+
+//effect: angular rastrea que señales usa dentro.
+//Cuando enclaveSeleccionado cambia, el codigo dentro del effect
+//se dispara para mover el "center" del mapa.

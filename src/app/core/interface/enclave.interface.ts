@@ -1,8 +1,11 @@
 //Interfaz para lo que recibo de la API
-export interface ViaVerde {
-  data: Array<{
+//mapea la respuesta exacta de la api
+//de los nombres de campos que vienen del servidor
+export interface EnclaveData {
     id: number;
     name: string;
+    slug?: string;
+    schedule: any[];
     cover_image?: {
       url:string;
     };
@@ -19,22 +22,16 @@ export interface ViaVerde {
     category?: {
       name: string
     };
-  }>;
 }
 
 //Mi interfaz, la que uso en el codigo
+//el objeto que uso internamente 
 export interface MiPunto {
   id:string;
-  nombre: string;
-  latitud: number;
-  longitud: number;
-  imagen:string;
-  direccion:string;
-}
-
-export interface Ruta {
-  id: string;
-  nombre: string;
-  kml: string;
-  imagen: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  image:string;
+  address:string;
+  horarios:any[];
 }

@@ -1,26 +1,35 @@
 <div class="sidebar-header">
-    <img src="viaverde.png" class="logo">
+  <img src="assets/viaverde.png" class="logo">
 
-<div class="tabs">
-    <button [class.active]="tabActual === 'puntos'" (click)="tabActual = 'puntos'">Puntos de interés
-    </button>
-    <button [class.active]="tabActual === 'rutas'" (click)="tabActual = 'rutas'">Rutas
-    </button>
-</div>
+  @if (!seleccionado() && !rutaSvc.rutaSeleccionada()) {
+    <div class="tabs">
+      <button [class.active]="tabActual === 'puntos'" (click)="navegarA('puntos')">
+        Puntos de interés
+      </button>
+
+      <button [class.active]="tabActual === 'rutas'" (click)="navegarA('rutas')">
+        Rutas
+      </button>
+    </div>
+  }
 </div>
 
 <div class="sidebar-content">
-    @if (seleccionado$ | async; as seleccionado){
-    <app-enclave-detail [punto]="seleccionado"></app-enclave-detail>
-    }
-    @else {
-        @if (tabActual === 'puntos') {
-        <app-enclave-list [puntos]="enclaves$ | async"></app-enclave-list>
-    } 
-    @else {
-      <div class="empty-state">
-        <p>Próximamente: Listado de rutas</p>
-      </div>
-    }
+  @if (seleccionado()) {
+    <app-enclave-detail [punto]="seleccionado()!"></app-enclave-detail>
+  } 
+
+  @else if (rutaSvc.rutaSeleccionada()) {
+    <app-ruta-detail></app-ruta-detail>
+  }
+
+  @else if (tabActual === 'puntos') {
+    <app-enclave-list [puntos]="enclaves()"></app-enclave-list>
+  }
+
+  @else {
+    <app-ruta-list></app-ruta-list>
   }
 </div>
+
+<!--La columna de la izquierda de la web-->

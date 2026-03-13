@@ -1,0 +1,19 @@
+<div class="rutas-container">
+  <header class="list-header">
+    <h2>Rutas disponibles</h2>
+  </header>
+
+  <div class="rutas-grid">
+    @for (ruta of rutaSvc.rutas(); track ruta.id) {
+      <div class="ruta-card" (click)="rutaSvc.seleccionarRuta(ruta)">
+        <div class="card-image">
+          <img [src]="ruta.image" [alt]="ruta.name">
+        </div>
+        <div class="card-info">
+          <h3>{{ ruta.name }}</h3>
+          <span class="action-text">Explorar ruta →</span>
+        </div>
+      </div>
+    }
+  </div>
+</div>

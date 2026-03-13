@@ -1,0 +1,38 @@
+@if (rutaSvc.rutaSeleccionada(); as ruta) {
+<div class="ruta-detail-wrapper">
+  <header class="detail-header">
+    <button class="back-circle" (click)="rutaSvc.seleccionarRuta(null)">✕</button>
+    <img [src]="ruta.image" class="hero-image">
+    <div class="header-content">
+      <h2>{{ ruta.name }}</h2>
+    </div>
+  </header>
+
+  <div class="action-pills">
+    <button class="pill primary">📍 Cómo llegar</button>
+    <button class="pill secondary" (click)="rutaSvc.copiarLinkRuta(ruta)">🔗 Compartir</button>
+  </div>
+
+  <div class="scroll-body">
+    <section class="info-section">
+      <h3>Descripción</h3>
+      <p>{{ ruta.description }}</p>
+    </section>
+
+    <section class="itinerary-section">
+      <h3>Itinerario</h3>
+      <div class="timeline">
+        @for (punto of ruta.itinerario; track $index) {
+          <div class="timeline-node">
+            <div class="node-marker">
+              <span class="inner-dot">{{ $index + 1 }}</span>
+              @if (!$last) { <div class="node-line"></div> }
+            </div>
+            <div class="node-content">{{ punto }}</div>
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+</div>
+}

@@ -1,7 +1,9 @@
 import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EnclaveService } from '../../../core/services/enclave.service';
-import { MiPunto } from '../../../core/models/enclave.model';
+import { MiPunto } from '../../../core/interface/enclave.interface';
+
+console.log('EL SERVICIO SE HA CARGADO CORRECTAMENTE');
 
 @Component({
   selector: 'app-enclave-detail',
@@ -13,4 +15,13 @@ import { MiPunto } from '../../../core/models/enclave.model';
 export class EnclaveDetailComponent {
   @Input() punto!: MiPunto;
   public enclaveSvc = inject(EnclaveService);
+
+
+  ngOnChanges(){
+    console.log('!El componente de detalle ha recibido datos!', this.punto);
+  }
+
+  info() {
+    return this.enclaveSvc.getEstadoHorario(this.punto.horarios);
+  }
 }

@@ -1,19 +1,37 @@
-import { Component } from '@angular/core';
+import { Component, Input, inject, effect } from '@angular/core';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { MapComponent } from '../map/map.component';
-
+import { EnclaveService } from '../../core/services/enclave.service';
 @Component({
   selector: 'app-mapa-page',
   standalone: true,
   imports: [SidebarComponent, MapComponent],
-  template: `
-    <aside class="sidebar">
-      <app-sidebar></app-sidebar>
-    </aside>
-    <main class="map-container">
-      <app-map></app-map>
-    </main>
-  `,
-  styleUrls: ['./mapa-page.component.css'] 
+  templateUrl: './mapa-page.component.html',
+  styleUrls: ['./mapa-page.component.css']
 })
-export class MapaPageComponent {}
+export class MapaPageComponent {
+
+  private enclaveSvc = inject(EnclaveService);
+
+  // 1. Este @Input recibe automáticamente el ":id" de la URL 
+  // (Funciona gracias al withComponentInputBinding que pusimos en app.config)
+  @Input() set slug(valor: string) {
+    if (valor) {
+      // 2. Usamos un effect para esperar a que los datos lleguen de la API.
+      // Cuando la lista de enclaves tenga datos, buscamos el que coincida con el ID de la URL.
+      effect(() => {
+        const puntos = this.enclaveSvc.enclaves();
+        if (puntos.length > 0) {
+          const encontrado = puntos.find(p => p.id === valor);
+          if (encontrado) {
+            // 3. Si lo encontramos, lo metemos en la "caja" de seleccionado
+            this.enclaveSvc.enclaveSeleccionado.set(encontrado);
+          }
+        }
+      });
+    }
+  }
+
+  //esto serviria para organizar los dos componentes hijos
+  //SidebarComponent y MapComponent
+}
