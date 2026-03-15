@@ -7,7 +7,7 @@ export interface AjaxData<T = any> {
 export interface AjaxOptions {
   headers?: { [header: string]: string | string[] };
   params?: { [param: string]: string | string[] };
-  skipNormalize?: boolean; // Si es true, devuelve la respuesta tal cual sin normalizar
+  skipNormalize?: boolean; 
 }
 
 export interface Error {

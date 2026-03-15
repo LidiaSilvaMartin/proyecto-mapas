@@ -5,7 +5,6 @@
 //Los componentes Sidebar y Map estan contectados a esa Signal
 //No necesitan pedir los datos, solo los miran.
 
-
 //en este archivo se sabe de donde vienen los datos y como se manipulan
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
@@ -15,7 +14,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { AjaxData } from '../interface/ajax-data.interface';
 import { EnclaveData, MiPunto } from '../interface/enclave.interface';
-
 
 //toSignal ejecuta la petición HTTP y guarda el resultado.
 //cualquier cambio notifica a los componentes.

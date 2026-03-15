@@ -1,5 +1,5 @@
 <google-map height="100%" width="100%" [center]="center" [zoom]="zoom">
-  @for (p of enclaves(); track p.id) {
+  @for (p of puntosAMostrar(); track p.id) {
   <map-marker [position]="{lat: p.latitude, lng: p.longitude}" [title]="p.name"
     (mapClick)="enclaveSvc.seleccionarEnclave(p)">
   </map-marker>

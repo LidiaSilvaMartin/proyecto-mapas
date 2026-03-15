@@ -1,6 +1,6 @@
 //componente que solo "mira" lo que dice el servicio
 //componente de visualización geográfica
-import { Component, inject, effect } from '@angular/core';
+import { Component, inject, effect, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GoogleMapsModule } from '@angular/google-maps';
 import { EnclaveService } from '../../core/services/enclave.service';
@@ -20,30 +20,42 @@ export class MapComponent {
     public enclaves = this.enclaveSvc.enclaves;
     public rutaSvc = inject(RutaService);
 
-    center: google.maps.LatLngLiteral = { lat: 36.5297, lng: -6.2946 }; 
+    public puntosAMostrar = computed(() => {
+        const seleccionado = this.enclaveSvc.enclaveSeleccionado();
+        const todos = this.enclaveSvc.enclaves();
+
+        if (seleccionado) {
+            return [seleccionado];
+        }
+        return todos;
+    });
+
+    center: google.maps.LatLngLiteral = { lat: 42.8805, lng: -8.5457 };
     zoom = 10;
 
     constructor() {
         effect(() => {
-            const p = this.enclaveSvc.enclaveSeleccionado();
-            if (p) {
-                this.center = { lat: p.latitude, lng: p.longitude };
-                this.zoom = 17;
+            const todos = this.enclaveSvc.enclaves();
+            const seleccionado = this.enclaveSvc.enclaveSeleccionado();
+            // Si acaban de cargar los puntos y NO hay nada seleccionado
+            if (todos.length > 0 && !seleccionado) {
+                // Centramos el mapa en el primer punto de la lista para "ir" a la zona
+                this.center = { lat: todos[0].latitude, lng: todos[0].longitude };
+                this.zoom = 12; // Un zoom que permita ver varios puntos
             }
         }, { allowSignalWrites: true });
 
+        // EFECTO 2: Cuando seleccionas un enclave específico
         effect(() => {
-            const r = this.rutaSvc.rutaSeleccionada();
-            if (r && r.kmlUrl) {
-                this.zoom = 12;
-
-            } else {
-                this.zoom = 10;
-                this.center = { lat: 36.5297, lng: -6.2946 };
+            const p = this.enclaveSvc.enclaveSeleccionado();
+            if (p) {
+                this.center = { lat: p.latitude, lng: p.longitude };
+                this.zoom = 17; // Zoom de detalle
             }
         }, { allowSignalWrites: true });
     }
 }
+
 
 //effect: angular rastrea que señales usa dentro.
 //Cuando enclaveSeleccionado cambia, el codigo dentro del effect
