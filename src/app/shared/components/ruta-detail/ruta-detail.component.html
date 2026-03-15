@@ -9,7 +9,7 @@
   </header>
 
   <div class="action-pills">
-    <button class="pill primary">📍 Cómo llegar</button>
+    <button class="pill primary" (click)="rutaSvc.abrirEnMaps(ruta)">📍 Cómo llegar</button>
     <button class="pill secondary" (click)="rutaSvc.copiarLinkRuta(ruta)">🔗 Compartir</button>
   </div>
 

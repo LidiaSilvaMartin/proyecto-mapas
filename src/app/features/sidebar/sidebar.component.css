@@ -7,8 +7,6 @@
 .sidebar-header {
   padding: 20px 15px;
   background: white;
-  border-bottom: 1px solid #eee;
-  flex-shrink: 0;
 }
 
 .logo {
@@ -21,6 +19,7 @@
   display: flex;
   gap: 8px;
   padding: 0 5px;
+  border-radius: 12px;
 }
 
 .tabs button {

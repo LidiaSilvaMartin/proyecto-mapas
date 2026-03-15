@@ -15,17 +15,44 @@ export class RutaService {
 
     public rutas = toSignal(
         this.http.get<AjaxData<RutaData[]>>("https://mapa.viaverdectl.gal/api/v1/routes").pipe(
-            map(res => res.data.map(item => this.normalizarRuta(item)))
+            map(res => {
+                const rutasApi = res.data.map(item => this.normalizarRuta(item));
+                const misRutas: Ruta[] = [
+                    {
+                        id: 'garganta-verde',
+                        name: 'Sendero de la Garganta Verde',
+                        description: 'Un espectacular cañón excavado por el río Bocaleones.',
+                        image: 'https://milyunarutas.com/wp-content/uploads/IMG_0950-1.webp',
+                        kmlUrl: 'https://raw.githubusercontent.com/LidiaSilvaMartin/proyecto-mapas/refs/heads/master/garganta-verde',
+                        distance: '2.5 km',
+                        difficulty: 'Alta',
+                        itinerario: ['Aparcamiento Inicio', 'Mirador de la Garganta', 'Descenso por el sendero', 'La Ermita (Cueva', 'Cauce  del Río Bocaleones']
+                    },
+                    {
+                        id: 'sendero-acantilado',
+                        name: 'Sendero del Acantilado',
+                        description: 'Ruta con vistas increíbles al mar desde los acantilados de Barbate.',
+                        image: 'https://i0.wp.com/milyunarutas.com/wp-content/uploads/Sendero-del-acantilado-1-scaled.jpg?fit=2560%2C1621&quality=89&ssl=1',
+                        kmlUrl: 'https://raw.githubusercontent.com/LidiaSilvaMartin/proyecto-mapas/refs/heads/master/sendero-acantilado',
+                        distance: '6 km',
+                        difficulty: 'Media',
+                        itinerario: ['Puerto de Barbate', 'Playa de la Hierbabuena', 'Acantilados del Tajo', 'Torre del Tajo', 'Pinar de la Breña', 'Ermita de San Ambrosio', 'Caños de Meca']
+                    }
+                ];
+
+                return [...misRutas, ...rutasApi];
+            }),
         ),
         { initialValue: [] as Ruta[] }
     );
 
+
     public rutaSeleccionada = signal<Ruta | null>(null);
 
-    // 3. Función para transformar los datos de la API y asignar tus KML de GitHub
+
     private normalizarRuta(item: RutaData): Ruta {
-        // Creamos primero el objeto 'ruta'
-        const ruta: Ruta = {
+
+        return {
             id: item.slug || item.id.toString(),
             name: item.name || 'Sin nombre',
             description: item.description || 'Descripción no disponible',
@@ -35,19 +62,21 @@ export class RutaService {
             distance: item.distance || '',
             difficulty: item.difficulty || ''
         };
+    }
 
-        // Ahora que 'ruta' existe, comparamos el nombre para meter tus KML
-        const nombreLimpio = ruta.name.toLowerCase();
 
-        if (nombreLimpio.includes('garganta verde')) {
-            ruta.kmlUrl = 'https://raw.githubusercontent.com/LidiaSilvaMartin/proyecto-mapas/master/Sendero%20de%20la%20Garganta%20Verde.kml';
-        } else if (nombreLimpio.includes('acantilado')) {
-            ruta.kmlUrl = 'https://raw.githubusercontent.com/LidiaSilvaMartin/proyecto-mapas/master/Sendero%20del%20Acantilado.kml';
+    abrirEnMaps(ruta: any) {
+
+        if (!ruta.kmlUrl) {
+            alert('Esta ruta no tiene un archivo de mapa disponible todavia.');
+            return;
         }
 
-        // Devolvemos el objeto final
-        return ruta;
+        window.open(ruta.kmlUrl, '_blank');
+
     }
+
+
     seleccionarRuta(ruta: Ruta | null) {
         this.rutaSeleccionada.set(ruta);
         if (ruta) {
@@ -58,7 +87,11 @@ export class RutaService {
     }
 
     copiarLinkRuta(ruta: Ruta) {
-        const url = `${window.location.origin}/mapa/rutas/${ruta.id}`;
-        navigator.clipboard.writeText(url).then(() => alert('Enlace de la ruta copiado.'));
+        // Esto crea: http://localhost:4200/mapa/rutas/garganta-verde
+        const urlDetalle = `${window.location.origin}/mapa/rutas/${ruta.id}`;
+
+        navigator.clipboard.writeText(urlDetalle).then(() => {
+            alert('Enlace de la ruta copiado al portapapeles');
+        });
     }
 }

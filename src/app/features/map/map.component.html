@@ -1,10 +1,13 @@
 <google-map height="100%" width="100%" [center]="center" [zoom]="zoom">
   @for (p of enclaves(); track p.id) {
-    <map-marker
-      [position]="{lat: p.latitude, lng: p.longitude}"
-      [title]="p.name"
-      (mapClick)="enclaveSvc.seleccionarEnclave(p)">
-    </map-marker>
+  <map-marker [position]="{lat: p.latitude, lng: p.longitude}" [title]="p.name"
+    (mapClick)="enclaveSvc.seleccionarEnclave(p)">
+  </map-marker>
+  }
+
+  @if (rutaSvc.rutaSeleccionada()?.kmlUrl) {
+  <map-kml-layer [url]="rutaSvc.rutaSeleccionada()!.kmlUrl!"
+  [options] = "{preserveViewport: false}"> </map-kml-layer>
   }
 </google-map>
 

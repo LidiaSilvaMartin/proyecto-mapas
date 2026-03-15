@@ -1,19 +1,28 @@
-<div class="rutas-container">
-  <header class="list-header">
-    <h2>Rutas disponibles</h2>
-  </header>
-
-  <div class="rutas-grid">
+<div class="sidebar-list">
     @for (ruta of rutaSvc.rutas(); track ruta.id) {
-      <div class="ruta-card" (click)="rutaSvc.seleccionarRuta(ruta)">
-        <div class="card-image">
-          <img [src]="ruta.image" [alt]="ruta.name">
+    <div class="card" (click)="rutaSvc.seleccionarRuta(ruta)">
+
+        <div class="card-img">
+            <img [src]="ruta.image" [alt]="ruta.name">
         </div>
+
         <div class="card-info">
-          <h3>{{ ruta.name }}</h3>
-          <span class="action-text">Explorar ruta →</span>
+            <h3>{{ ruta.name }}</h3>
+    
+        <div class="card-icons">
+            <span class="icon-action" (click)="$event.stopPropagation(); 
+            rutaSvc.abrirEnMaps(ruta)"
+                title="Cómo llegar"> ➡️ </span>
+            <span class="icon-action" (click)="$event.stopPropagation(); 
+            rutaSvc.copiarLinkRuta(ruta)"
+                title="Compartir enlace">
+                🔗
+            </span>
         </div>
-      </div>
-    }
-  </div>
+    </div>
+
+</div>
+} @empty {
+<div class="empty">Cargando rutas de la Vía Verde...</div>
+}
 </div>
