@@ -24,15 +24,16 @@ import { EnclaveData, MiPunto } from '../interface/enclave.interface';
   providedIn: 'root'
 })
 export class EnclaveService {
-  private http = inject(HttpClient);
-  private router = inject(Router);
+  private http = inject(HttpClient); //para hacer peticiones HTTP
+  private router = inject(Router); //para movernos entre rutas
 
-
+//enclaves es una signal que tiene la lista de todos los puntos
   public enclaves = toSignal(
     this.http.get<AjaxData<EnclaveData[]>>("https://mapa.viaverdectl.gal/api/v1/enclaves").pipe(
+   //Transformamos la respuesta, mapeamos cada item de la API a nuestro formato "MiPunto"
       map(res => res.data.map(item => this.normalizarEnclave(item)))
     ),
-    { initialValue: [] as MiPunto[] }
+    { initialValue: [] as MiPunto[] } //valor inicial vacio mientras carga la api
   )
   //Guardamos que punto esta seleccionado mediante signal, que es como una caja que guarda el punto que clickas.
   public enclaveSeleccionado = signal<MiPunto | null>(null);
@@ -40,36 +41,37 @@ export class EnclaveService {
 
 
   private normalizarEnclave(item: EnclaveData): MiPunto {
-    const loc = item.locations?.[0];
+    const loc = item.locations?.[0]; //coge la primera ubi de la lista que trae el item
     return {
+      //si no hay slug, creamos un ID basado en el nombre (limpiando espacios y poniendo guiones)
       id: item.slug || item.name.toLowerCase().trim().replace(/\s+/g, '-'),
-      name: item.name,
-      latitude: parseFloat(loc?.coords?.latitude || '42.88'),
-      longitude: parseFloat(loc?.coords?.longitude || '-8.53'),
-      image: item.cover_image?.url || 'https://via.placeholder.com/400x250',
+      name: item.name, //nombre del sitio
+      latitude: parseFloat(loc?.coords?.latitude || '42.88'), //convertir texto a numero decimal
+      longitude: parseFloat(loc?.coords?.longitude || '-8.53'), //coordenadas por defecto si fallan
+      image: item.cover_image?.url || 'https://via.placeholder.com/400x250', //foto
       address: loc?.address || 'Dirección no disponible',
-      horarios: item.schedule || []
+      horarios: item.schedule || [] //lista de horarios
     };
   }
 
   //.pipe(map): es como un tunel que coge el JSON bruto de la API 
   //y lo convierte en objetos "MiPunto".
 
-  //Metodo que permite a los componentes cambiar el estado global de la app
+  //Se ejecuta cuando haces clic en un punto de la lista o un marcador
   seleccionarEnclave(punto: MiPunto | null) {
-    this.enclaveSeleccionado.set(punto);
+    this.enclaveSeleccionado.set(punto); //actualizamos la signal con el nuevo punto
     if (punto) {
       // Al clicar: http://localhost:4200/mapa/enclaves/nombre-del-sitio
       this.router.navigate(['/mapa/enclaves', punto.id]);
     } else {
-      // Al cerrar: http://localhost:4200/mapa/enclaves
+      // Al cerrar: http://localhost:4200/mapa/enclaves, volvemos a la lista general
       this.router.navigate(['/mapa/enclaves']);
     }
   }
 
   //Abrir "como llegar" en google maps 
   abrirEnGoogleMaps(punto: MiPunto) {
-    const coords = `${punto.latitude},${punto.longitude}`;
+    const coords = `${punto.latitude},${punto.longitude}`; //preparamos la longitud y latitud
     window.open(`https://www.google.com/maps/search/?api=1&query=${coords}`, '_blank');
   }
 
@@ -80,49 +82,58 @@ export class EnclaveService {
 
   //funcion para conseguir el horario del sitio abierto o cerrado
   getEstadoHorario(horarios: any[]) {
-   if (!horarios || horarios.length === 0) return { abierto: false, mensaje: 'Horario no disponible' };
 
-  const ahora = new Date();
-  const diaHoy = ahora.getDay() === 0 ? 7 : ahora.getDay(); // Viernes = 5
+    //si no hay horarios, devolvemos un mensaje de error
 
-  // 1. Buscamos el horario de hoy. 
-  // Usamos Number() porque en tu consola vimos que a veces vienen como strings.
-  const hoy = horarios.find(h => Number(h.day) === diaHoy);
+    if (!horarios || horarios.length === 0) {
+      return { abierto: false, mensaje: 'Horario no disponible' };
+    }
 
-  // 2. Si no hay datos para hoy, o la API dice explícitamente que está cerrado
-  if (!hoy || hoy.is_closed === true || hoy.is_closed === 1) {
-    return { abierto: false, mensaje: 'Cerrado por descanso o temporada' };
-  }
+    const ahora = new Date(); //fecha y hora actual del ordenador
+    // Domingo es 0 en JS, la API parece usar 7 para domingo, 4 para Jueves (Thu), etc.
+    const diaSemanaActual = ahora.getDay() === 0 ? 7 : ahora.getDay();
 
-  // 3. Intentamos sacar las horas del primer turno (first_shift)
-  let opening = '';
-  let closing = '';
+    //Buscamos el horario que coincida con el dia de hoy
+    const hoy = horarios.find(h => h.day?.id === diaSemanaActual);
 
-  if (hoy.first_shift && hoy.first_shift.opening && hoy.first_shift.closing) {
-    opening = hoy.first_shift.opening;
-    closing = hoy.first_shift.closing;
-  } else if (hoy.opening && hoy.closing) {
-    // Por si acaso algunos vienen sin 'first_shift'
-    opening = hoy.opening;
-    closing = hoy.closing;
-  }
+    //si no encontramos el dia, decimos que esta cerrado
+    if (!hoy) {
+      return { abierto: false, mensaje: 'Cerrado hoy' };
+    }
 
-  // 4. Si no hemos encontrado horas válidas
-  if (!opening || !closing) {
-    return { abierto: false, mensaje: 'Cerrado hoy (sin horario definido)' };
-  }
+    //Función para extraer solo la hora "13:00" de una cadena "2026-01-19 13:00:00"
+    // y convertirla a minutos totales
+    const extraerMinutos = (fechaStr: string | undefined) => {
+      if (!fechaStr) return -1;
+      const horaParte = fechaStr.split(' ')[1]; // Nos quedamos con "13:00:00"
+      const [hrs, mins] = horaParte.split(':').map(Number); //sacamos horas y minutos como numeros
+      return hrs * 60 + mins;
+    };
 
-  // 5. Comparación final
-  const actual = ahora.getHours() * 100 + ahora.getMinutes();
-  const abre = parseInt(opening.replace(/:/g, '').substring(0, 4), 10);
-  const cierre = parseInt(closing.replace(/:/g, '').substring(0, 4), 10);
+    const actual = ahora.getHours() * 60 + ahora.getMinutes(); //hora actual en minutos totales
 
-  if (actual >= abre && actual < cierre) {
-    return { abierto: true, mensaje: `Abierto. Cierra a las ${closing.substring(0, 5)}` };
-  } else if (actual < abre) {
-    return { abierto: false, mensaje: `Cerrado. Abre a las ${opening.substring(0, 5)}` };
-  } else {
+    //Calculamos los minutos de apertura y cierre de los dos turnos
+    const abre1 = extraerMinutos(hoy.first_shift?.open);
+    const cierra1 = extraerMinutos(hoy.first_shift?.close);
+    const abre2 = extraerMinutos(hoy.second_shift?.open);
+    const cierra2 = extraerMinutos(hoy.second_shift?.close);
+
+    //Si el momento actual esta dentro del turno 1 0  dentro del turno 2, esta abierto
+    if ((actual >= abre1 && actual < cierra1) || (actual >= abre2 && actual < cierra2)) {
+      return { abierto: true, mensaje: 'Abierto ahora' };
+    }
+
+    //si aun no ha llegado la hora de abrir el primer turno
+    if (abre1 !== -1 && actual < abre1) {
+      return { abierto: false, mensaje: `Cerrado (Abre a las ${hoy.first_shift.open.split(' ')[1].substring(0, 5)})` };
+    }
+
+    //si estamos en el descanso entre el turno de mañana y tarde
+    if (abre2 !== -1 && actual > cierra1 && actual < abre2) {
+      return { abierto: false, mensaje: `Cerrado (Vuelve a abrir a las ${hoy.second_shift.open.split(' ')[1].substring(0, 5)})` };
+    }
+
+    //si ya ha pasado la hora de cierre del ultimo turno
     return { abierto: false, mensaje: 'Cerrado por hoy' };
   }
-}
 }

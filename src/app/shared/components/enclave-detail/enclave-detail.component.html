@@ -21,17 +21,20 @@
   <div class="info-body">
     <h3 class="green-title">📄 Datos de interés</h3>
     <div class="info-item">📍 {{ punto.address }}</div>
-   
-    <div class="info-item">
-      🕒 
+
+    <div class="info-item schedule-row">
+      <span>🕒</span>
+
       @if (enclaveSvc.getEstadoHorario(punto.horarios); as res) {
-        <strong [style.color]="res.abierto ? '#2e7d32' : '#d32f2f'">
-          {{ res.abierto ? 'Abierto.' : 'Cerrado.' }}
+      <div class="schedule-content">
+        <strong [class.text-open]="res.abierto" [class.text-closed]="!res.abierto">
+          {{ res.mensaje }}
         </strong>
-        <span> {{ res.mensaje }}</span>
+      </div>
+      } @else {
+      <span> Horario no disponible</span>
       }
     </div>
-</div>
 
-</div>
-<!--Es la ficha tecnica lo que aparece cuando haces clic en un punto de la lista-->
+  </div>
+  <!--Es la ficha tecnica lo que aparece cuando haces clic en un punto de la lista-->
