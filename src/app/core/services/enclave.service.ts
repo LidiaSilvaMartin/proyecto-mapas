@@ -75,7 +75,11 @@ export class EnclaveService {
 
   copiarLink(punto: MiPunto) {
     const url = `${window.location.origin}/mapa/enclaves/${punto.id}`;
-    navigator.clipboard.writeText(url).then(() => alert('Enlace copiado al portapapeles.'));
+
+    navigator.clipboard.writeText(url).then(() => alert('Enlace listo para compartir')).catch(err => {
+      console.error('Error al copiar el enlace: ', err);
+    });
+
   }
 
   //funcion para conseguir el horario del sitio abierto o cerrado

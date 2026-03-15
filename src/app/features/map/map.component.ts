@@ -40,7 +40,7 @@ export class MapComponent {
             // Si acaban de cargar los puntos y NO hay nada seleccionado
             if (todos.length > 0 && !seleccionado) {
                 // Centramos el mapa en el primer punto de la lista para "ir" a la zona
-                this.center = { lat: todos[0].latitude, lng: todos[0].longitude };
+               this.center = { lat: todos[0].latitude, lng: todos[0].longitude };
                 this.zoom = 12; // Un zoom que permita ver varios puntos
             }
         }, { allowSignalWrites: true });
@@ -54,7 +54,7 @@ export class MapComponent {
             }
         }, { allowSignalWrites: true });
     }
-}
+}   
 
 
 //effect: angular rastrea que señales usa dentro.
